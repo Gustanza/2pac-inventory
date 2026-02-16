@@ -232,7 +232,7 @@
               placeholder="Optional description for this category"
             />
           </div>
-
+          {{ formData }}
           <div class="flex justify-end space-x-3 pt-4">
             <button
               type="button"

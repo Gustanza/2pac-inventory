@@ -13,7 +13,7 @@
           label="Email"
           type="email"
           autocomplete="email"
-          v-model="email"
+          v-model="user.email"
           required
         />
 
@@ -22,7 +22,7 @@
           label="Password"
           type="password"
           autocomplete="current-password"
-          v-model="password"
+          v-model="user.password"
           required
         />
 
@@ -56,11 +56,16 @@ import { useRouter } from 'vue-router';
 import FormInput from '../components/FormInput.vue';
 import LoadingSpinner from '../components/LoadingSpinner.vue';
 import ErrorBanner from '../components/ErrorBanner.vue';
+import axiosClient from '../axiosClient';
 
 const router = useRouter();
 
-const email = ref('');
-const password = ref('');
+const user = ref({
+  email: '',
+  password: '',
+  remember: true
+});
+
 const loading = ref(false);
 const error = ref('');
 
@@ -70,23 +75,17 @@ const handleSubmit = async () => {
   loading.value = true;
   error.value = '';
 
-  // Very basic fake "validation" so empty forms don't silently succeed.
-  if (!email.value || !password.value) {
-    error.value = 'Please enter email and password.';
+  axiosClient.post('/login', user.value).then((response) => {
+    sessionStorage.setItem('access_token', response.data.token);
+    sessionStorage.setItem('current_user', JSON.stringify(response.data.user));
     loading.value = false;
-    return;
-  }
+    router.push({ name: 'dashboard' });
+  }).catch((error) => {
+    loading.value = false;
+    error.value = 'Invalid credentials';
+  });
 
-  // Simulate successful login by storing a fake token.
-  window.localStorage.setItem('auth_token', 'fake-dev-token');
-  // Optionally persist a fake user profile for display.
-  window.localStorage.setItem(
-    'auth_user',
-    JSON.stringify({ email: email.value })
-  );
 
-  loading.value = false;
-  router.push({ name: 'shops' });
 };
 
 const goRegister = () => {

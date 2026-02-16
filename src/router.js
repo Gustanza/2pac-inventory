@@ -48,7 +48,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const token = window.localStorage.getItem('auth_token');
+  const token = sessionStorage.getItem('access_token');
   if (!to.meta.public && !token) {
     next({ name: 'login' });
   } else {

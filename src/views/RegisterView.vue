@@ -8,12 +8,12 @@
       <ErrorBanner v-if="error" :message="error" />
 
       <form class="space-y-4" @submit.prevent="handleSubmit">
-        <FormInput
+        <FormInput 
           id="name"
           label="Name"
           type="text"
           autocomplete="name"
-          v-model="name"
+          v-model="user.name"
           required
         />
 
@@ -22,7 +22,7 @@
           label="Email"
           type="email"
           autocomplete="email"
-          v-model="email"
+          v-model="user.email"
           required
         />
 
@@ -31,10 +31,18 @@
           label="Password"
           type="password"
           autocomplete="new-password"
-          v-model="password"
+          v-model="user.password"
           required
         />
 
+        <FormInput
+          id="password"
+          label="Password"
+          type="password"
+          autocomplete="new-password"
+          v-model="user.password_confirmation"
+          required
+        />
         <button
           type="submit"
           class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
@@ -62,15 +70,20 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axiosClient from '../axiosClient.js';
 import FormInput from '../components/FormInput.vue';
 import LoadingSpinner from '../components/LoadingSpinner.vue';
 import ErrorBanner from '../components/ErrorBanner.vue';
 
 const router = useRouter();
 
-const name = ref('');
-const email = ref('');
-const password = ref('');
+const user = ref({
+  name: '',
+  email: '',
+  password: '', 
+  password_confirmation: ''
+})
+
 const loading = ref(false);
 const error = ref('');
 
@@ -79,22 +92,25 @@ const handleSubmit = async () => {
   // In a real app, this must be replaced with a real API request.
   loading.value = true;
   error.value = '';
-
-  if (!name.value || !email.value || !password.value) {
-    error.value = 'Please fill in all fields.';
+ 
+  await axiosClient.post('/register', user.value).then(() => {
     loading.value = false;
-    return;
-  }
-
+    router.push({ name: 'login' });
+    console.log("Registration successful");
+  }).catch((error) => {
+    loading.value = false;
+    error.value = error.response.data.message;
+    console.log("Registration failed");
+  })
+    
   // Simulate "register then auto-login" by storing fake user + token.
-  window.localStorage.setItem('auth_token', 'fake-dev-token');
-  window.localStorage.setItem(
-    'auth_user',
-    JSON.stringify({ name: name.value, email: email.value })
-  );
-
-  loading.value = false;
-  router.push({ name: 'shops' });
+  // window.localStorage.setItem('auth_token', 'fake-dev-token');
+  // window.localStorage.setItem(
+  //   'auth_user',
+  //   JSON.stringify({ name: name.value, email: email.value })
+  // );
+  // loading.value = false;
+  // router.push({ name: 'shops' });
 };
 
 const goLogin = () => {
