@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Shop;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreShopRequest;
 
 class ShopController extends Controller
 {
@@ -18,11 +19,11 @@ class ShopController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreShopRequest $request)
     {
-        //
+        $data = $request->validated();
+        return response()->json($data);
     }
-
     /**
      * Display the specified resource.
      */
